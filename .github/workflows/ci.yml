@@ -1,0 +1,85 @@
+# CI baseline for repositories created from dialectic-playground/repo-template.
+#
+# - Repository checks: the standard files exist and no "TEMPLATE:" markers remain
+#   (skipped in the template repository itself).
+# - DCO: Signed-off-by on every pull-request commit.
+# - "CI result" is the single check required by the branch ruleset (same name in every repo).
+#   Add your repository's own jobs (build, test, lint, …) to its "needs" list.
+#
+# Language repositories replace the "checks" job with the curriculum's CI template
+# (sdlc-curriculum/shared/ci/cross-platform-ci.yml) and keep "dco" and "ci-result".
+# Actions are pinned to full commit SHAs (organization policy); Dependabot keeps them current.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Standard files are present
+        run: |
+          status=0
+          for file in LICENSE README.md .editorconfig .gitattributes .gitignore \
+                      .github/CODEOWNERS .github/dependabot.yml; do
+            [ -f "$file" ] || { echo "::error::Missing standard file: $file"; status=1; }
+          done
+          exit "$status"
+
+      - name: No unfinished template markers
+        if: github.repository != 'dialectic-playground/repo-template'
+        run: |
+          if grep -rn --exclude-dir=.git --exclude-dir=.github "TEMPLATE:" .; then
+            echo "::error::Replace every TEMPLATE: marker (see the lines above)."
+            exit 1
+          fi
+
+  dco:
+    name: DCO
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check Signed-off-by on every commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          status=0
+          for commit in $(git rev-list --no-merges "$BASE_SHA..$HEAD_SHA"); do
+            author="$(git log -1 --format='%an <%ae>' "$commit")"
+            case "$author" in *"[bot]@users.noreply.github.com>") continue ;; esac
+            if ! git log -1 --format=%B "$commit" | grep -qiF "Signed-off-by: $author"; then
+              echo "::error::Commit $commit is missing 'Signed-off-by: $author' (use git commit -s)"
+              status=1
+            fi
+          done
+          exit "$status"
+
+  ci-result:
+    name: CI result
+    if: always()
+    needs: [checks, dco]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+
+      - name: All required jobs passed
+        run: echo "All required jobs succeeded or were skipped."
