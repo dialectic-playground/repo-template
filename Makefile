@@ -23,7 +23,8 @@ STANDARD_FILES := LICENSE README.md Containerfile Makefile .editorconfig .gitatt
 
 check: check-repository
 
-# The standard files exist, and (except in repo-template itself) no template markers remain.
+# The standard files exist, and (except in repo-template itself) no template markers remain
+# in tracked files (dependency folders such as node_modules or .venv are never searched).
 check-repository:
 	@status=0; \
 	for file in $(STANDARD_FILES); do \
@@ -33,8 +34,13 @@ check-repository:
 		echo "repo-template: template markers are expected here; skipping the marker check"; \
 	else \
 		marker="TEMPLATE"; marker="$$marker:"; \
-		if grep -rn --exclude-dir=.git --exclude-dir=.github --exclude-dir=tools "$$marker" .; then \
-			echo "replace every $$marker marker listed above"; status=1; \
+		if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+			matches=$$(git grep -n "$$marker" -- . ':!.github' ':!tools'); \
+		else \
+			matches=$$(grep -rn --exclude-dir=.git --exclude-dir=.github --exclude-dir=tools "$$marker" .); \
+		fi; \
+		if [ -n "$$matches" ]; then \
+			printf '%s\n' "$$matches"; echo "replace every $$marker marker listed above"; status=1; \
 		fi; \
 	fi; \
 	exit $$status
