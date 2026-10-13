@@ -24,7 +24,23 @@ ONE-LINE DESCRIPTION. <!-- TEMPLATE: the canonical description, identical to the
 
 | Path | Contents |
 | :--- | :--- |
-| `.github/workflows/ci.yml` | CI (workflow **CI**): repository checks, DCO, and the required **CI result** check |
+| `Makefile` | Container-first entry point: `make check` runs everything CI checks |
+| `Containerfile` | The toolchain image: an official image pinned by digest |
+| `.devcontainer/` | Dev container using the same image |
+| `tools/dp-run`, `tools/container.mk` | Shared container tooling (copies of the canonical files in `dialectic-playground/.github`) |
+| `.github/workflows/ci.yml` | CI (workflow **CI**): container and native `make check`, shared-tooling check, DCO, and the required **CI result** check |
+
+## Development
+
+Container-first: `make` targets and `tools/dp-run <command>` run in the toolchain container
+via Podman, then Docker, then the local system. `DP_RUNTIME=podman|docker|local` overrides the
+choice. See
+[Container-first development](https://dialectic-playground.github.io/docs/explanation/container-first-development/).
+
+```sh
+make check                    # everything CI checks
+DP_RUNTIME=local make check   # the same, natively
+```
 
 ## Contributing
 
