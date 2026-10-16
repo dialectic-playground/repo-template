@@ -1,3 +1,16 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
+
+- [REPO-NAME <!-- TEMPLATE: repository name -->](#repo-name----template-repository-name---)
+  - [Layout](#layout)
+  - [Development](#development)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 <!--
 TEMPLATE: This README is the standard skeleton for Dialectic Playground repositories.
 Replace every line marked "TEMPLATE:" and delete this comment. CI fails in any repository
@@ -22,13 +35,13 @@ ONE-LINE DESCRIPTION. <!-- TEMPLATE: the canonical description, identical to the
 
 <!-- TEMPLATE: describe the top-level files and directories. -->
 
-| Path | Contents |
-| :--- | :--- |
-| `Makefile` | Container-first entry point: `make check` runs everything CI checks |
-| `Containerfile` | The toolchain image: an official image pinned by digest |
-| `.devcontainer/` | Dev container using the same image |
-| `tools/dp-run`, `tools/container.mk` | Shared container tooling (copies of the canonical files in `dialectic-playground/.github`) |
-| `.github/workflows/ci.yml` | CI (workflow **CI**): container and native `make check`, shared-tooling check, DCO, and the required **CI result** check |
+| Path                                 | Contents                                                                                                                 |
+| :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `Makefile`                           | Container-first entry point: `make check` runs everything CI checks                                                      |
+| `Containerfile`                      | The toolchain image: an official image pinned by digest                                                                  |
+| `.devcontainer/`                     | Dev container using the same image                                                                                       |
+| `tools/dp-run`, `tools/container.mk` | Shared container tooling (copies of the canonical files in `dialectic-playground/.github`)                               |
+| `.github/workflows/ci.yml`           | CI (workflow **CI**): container and native `make check`, shared-tooling check, DCO, and the required **CI result** check |
 
 ## Development
 
